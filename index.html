@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nova Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f0f13;
+      color: #e2e2e8;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+    .dash { padding: 28px 32px; max-width: 1280px; margin: 0 auto; }
+
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+    .topbar h1 { font-size: 22px; font-weight: 700; color: #e2e2e8; letter-spacing: 0.4px; }
+    .topbar h1 i { font-size: 20px; vertical-align: -3px; margin-right: 10px; color: #6c63ff; }
+    .topbar-sub { font-size: 12px; color: #444; margin-top: 3px; }
+    .topbar-right { display: flex; align-items: center; gap: 18px; }
+    .notif-wrap { position: relative; cursor: pointer; }
+    .notif-wrap i { font-size: 20px; color: #555; }
+    .notif-badge {
+      position: absolute; top: -4px; right: -6px;
+      background: #ff5e7d; color: #fff;
+      font-size: 9px; font-weight: 700;
+      border-radius: 50%; width: 16px; height: 16px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #6c63ff, #3ecfcf);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #fff;
+    }
+    .user-info .name { font-size: 14px; font-weight: 600; color: #e2e2e8; }
+    .user-info .role { font-size: 11px; color: #555; }
+
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #18181f; border: 1px solid #2a2a35; border-radius: 14px; padding: 18px 20px; }
+    .stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .stat-label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 1px; }
+    .stat-icon-wrap { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+    .stat-value { font-size: 26px; font-weight: 700; color: #e2e2e8; margin-bottom: 6px; }
+    .stat-change { font-size: 11px; }
+    .up { color: #3ecfcf; } .down { color: #ff5e7d; }
+
+    .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .card { background: #18181f; border: 1px solid #2a2a35; border-radius: 14px; padding: 20px; }
+    .card-title { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 18px; font-weight: 600; }
+
+    .chart-area { height: 150px; display: flex; align-items: flex-end; gap: 10px; }
+    .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .bars-row { display: flex; align-items: flex-end; gap: 3px; width: 100%; }
+    .bar { flex: 1; border-radius: 4px 4px 0 0; transition: opacity 0.2s; cursor: pointer; }
+    .bar:hover { opacity: 0.7; }
+    .bar-label { font-size: 10px; color: #555; }
+    .legend { display: flex; gap: 16px; margin-top: 14px; }
+    .leg-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+    .leg-item { font-size: 11px; color: #666; }
+
+    .activity-list { display: flex; flex-direction: column; gap: 10px; }
+    .act-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: #0f0f13; border-radius: 8px; }
+    .act-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .act-text { font-size: 12px; color: #bbb; flex: 1; line-height: 1.4; }
+    .act-time { font-size: 11px; color: #444; white-space: nowrap; }
+
+    .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .table-wrap table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .table-wrap th { color: #555; text-transform: uppercase; font-size: 10px; letter-spacing: 0.8px; padding: 6px 0; text-align: left; border-bottom: 1px solid #2a2a35; }
+    .table-wrap td { padding: 10px 0; color: #bbb; border-bottom: 1px solid #1e1e28; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+    .badge.active  { background: #0d2e2e; color: #3ecfcf; }
+    .badge.pending { background: #2a1f0a; color: #f5a623; }
+    .badge.done    { background: #0d1f1f; color: #52d9a0; }
+
+    .donut-wrap { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 18px; }
+    .donut-legend { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+    .dl-item { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+    .dl-label { display: flex; align-items: center; gap: 8px; color: #bbb; }
+    .dl-val { color: #e2e2e8; font-weight: 700; }
+
+    @media (max-width: 900px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .main-grid, .bottom-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 500px) {
+      .dash { padding: 16px; }
+      .stats { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="dash">
+
+  <div class="topbar">
+    <div>
+      <h1><i class="ti ti-layout-dashboard"></i>Nova Dashboard</h1>
+      <div class="topbar-sub">Friday, 29 May 2026</div>
+    </div>
+    <div class="topbar-right">
+      <div class="notif-wrap">
+        <i class="ti ti-bell"></i>
+        <div class="notif-badge">3</div>
+      </div>
+      <div class="avatar">GK</div>
+      <div class="user-info">
+        <div class="name">Gopal Kumar</div>
+        <div class="role">Admin · AWS Support</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Total Users</span>
+        <div class="stat-icon-wrap" style="background:#1a1830"><i class="ti ti-users" style="color:#6c63ff"></i></div>
+      </div>
+      <div class="stat-value">24,512</div>
+      <div class="stat-change up">↑ 12.4% this month</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Revenue</span>
+        <div class="stat-icon-wrap" style="background:#0d2020"><i class="ti ti-currency-rupee" style="color:#3ecfcf"></i></div>
+      </div>
+      <div class="stat-value">₹8.3L</div>
+      <div class="stat-change up">↑ 7.2% vs last month</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Orders</span>
+        <div class="stat-icon-wrap" style="background:#1e1a0d"><i class="ti ti-package" style="color:#f5a623"></i></div>
+      </div>
+      <div class="stat-value">1,847</div>
+      <div class="stat-change down">↓ 3.1% this week</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Uptime</span>
+        <div class="stat-icon-wrap" style="background:#0d1f1a"><i class="ti ti-server" style="color:#52d9a0"></i></div>
+      </div>
+      <div class="stat-value">99.8%</div>
+      <div class="stat-change up">↑ Stable — AWS</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="card">
+      <div class="card-title">Weekly Traffic</div>
+      <div class="chart-area" id="barChart"></div>
+      <div class="legend">
+        <span class="leg-item"><span class="leg-dot" style="background:#6c63ff"></span>Visitors</span>
+        <span class="leg-item"><span class="leg-dot" style="background:#3ecfcf"></span>Sessions</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Recent Activity</div>
+      <div class="activity-list" id="actList"></div>
+    </div>
+  </div>
+
+  <div class="bottom-grid">
+    <div class="card table-wrap">
+      <div class="card-title">Recent Orders</div>
+      <table>
+        <thead>
+          <tr><th>Order</th><th>Customer</th><th>Amount</th><th>Status</th></tr>
+        </thead>
+        <tbody id="orderTable"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Traffic Sources</div>
+      <div class="donut-wrap">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="42" fill="none" stroke="#2a2a35" stroke-width="15"/>
+          <circle cx="55" cy="55" r="42" fill="none" stroke="#6c63ff" stroke-width="15" stroke-dasharray="110 154" stroke-dashoffset="-10" stroke-linecap="round"/>
+          <circle cx="55" cy="55" r="42" fill="none" stroke="#3ecfcf" stroke-width="15" stroke-dasharray="65 154" stroke-dashoffset="-120" stroke-linecap="round"/>
+          <circle cx="55" cy="55" r="42" fill="none" stroke="#ff5e7d" stroke-width="15" stroke-dasharray="40 154" stroke-dashoffset="-185" stroke-linecap="round"/>
+          <circle cx="55" cy="55" r="42" fill="none" stroke="#f5a623" stroke-width="15" stroke-dasharray="24 154" stroke-dashoffset="-225" stroke-linecap="round"/>
+          <text x="55" y="59" text-anchor="middle" fill="#e2e2e8" font-size="13" font-weight="700" font-family="Segoe UI, sans-serif">62%</text>
+        </svg>
+        <div class="donut-legend">
+          <div class="dl-item"><span class="dl-label"><span class="leg-dot" style="background:#6c63ff"></span>Organic Search</span><span class="dl-val">42%</span></div>
+          <div class="dl-item"><span class="dl-label"><span class="leg-dot" style="background:#3ecfcf"></span>Direct</span><span class="dl-val">28%</span></div>
+          <div class="dl-item"><span class="dl-label"><span class="leg-dot" style="background:#ff5e7d"></span>Social Media</span><span class="dl-val">18%</span></div>
+          <div class="dl-item"><span class="dl-label"><span class="leg-dot" style="background:#f5a623"></span>Referral</span><span class="dl-val">12%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const visitors = [320,480,390,520,610,430,570];
+  const sessions = [210,350,280,410,490,320,440];
+  const maxV = Math.max(...visitors);
+  const chart = document.getElementById('barChart');
+  days.forEach((d, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'bar-wrap';
+    wrap.style.height = '100%';
+    const barsRow = document.createElement('div');
+    barsRow.className = 'bars-row';
+    const vBar = document.createElement('div');
+    vBar.className = 'bar';
+    vBar.style.height = Math.round((visitors[i] / maxV) * 120) + 'px';
+    vBar.style.background = '#6c63ff';
+    vBar.title = 'Visitors: ' + visitors[i];
+    const sBar = document.createElement('div');
+    sBar.className = 'bar';
+    sBar.style.height = Math.round((sessions[i] / maxV) * 120) + 'px';
+    sBar.style.background = '#3ecfcf';
+    sBar.style.opacity = '0.75';
+    sBar.title = 'Sessions: ' + sessions[i];
+    barsRow.appendChild(vBar);
+    barsRow.appendChild(sBar);
+    const lbl = document.createElement('div');
+    lbl.className = 'bar-label';
+    lbl.textContent = d;
+    wrap.appendChild(barsRow);
+    wrap.appendChild(lbl);
+    chart.appendChild(wrap);
+  });
+
+  const acts = [
+    { dot: '#6c63ff', text: 'New user registered: Rahul Verma', time: '2m ago' },
+    { dot: '#3ecfcf', text: 'Order #1847 shipped successfully', time: '15m ago' },
+    { dot: '#f5a623', text: 'Server load spike detected (AWS)', time: '1h ago' },
+    { dot: '#52d9a0', text: 'Payment received ₹12,500', time: '2h ago' },
+    { dot: '#ff5e7d', text: 'Failed login attempt blocked', time: '3h ago' },
+  ];
+  const actList = document.getElementById('actList');
+  acts.forEach(a => {
+    actList.innerHTML += `<div class="act-item"><div class="act-dot" style="background:${a.dot}"></div><div class="act-text">${a.text}</div><div class="act-time">${a.time}</div></div>`;
+  });
+
+  const orders = [
+    { id: '#1847', name: 'Anjali Singh',  amt: '₹3,200', status: 'active'  },
+    { id: '#1846', name: 'Ravi Sharma',   amt: '₹1,800', status: 'done'    },
+    { id: '#1845', name: 'Priya Patel',   amt: '₹5,400', status: 'pending' },
+    { id: '#1844', name: 'Mohan Das',     amt: '₹900',   status: 'done'    },
+    { id: '#1843', name: 'Seema Rao',     amt: '₹2,100', status: 'active'  },
+  ];
+  const tbody = document.getElementById('orderTable');
+  orders.forEach(o => {
+    tbody.innerHTML += `<tr><td style="color:#777">${o.id}</td><td>${o.name}</td><td style="color:#e2e2e8;font-weight:600">${o.amt}</td><td><span class="badge ${o.status}">${o.status}</span></td></tr>`;
+  });
+</script>
+</body>
+</html>
